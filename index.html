@@ -10,20 +10,22 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #1a1a1a;
+            color: #ffffff;
         }
         .container {
-            background-color: white;
+            background-color: #2d2d2d;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .logo {
             max-width: 200px;
             margin-bottom: 20px;
+            filter: brightness(0) invert(1);
         }
         h1 {
-            color: #333;
+            color: #ffffff;
             margin-bottom: 20px;
         }
         textarea {
@@ -31,9 +33,16 @@
             height: 300px;
             padding: 10px;
             margin-bottom: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 4px;
             resize: vertical;
+            background-color: #3d3d3d;
+            color: #ffffff;
+            font-family: monospace;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
         }
         button {
             background-color: #4CAF50;
@@ -47,13 +56,15 @@
             align-items: center;
             justify-content: center;
             min-width: 120px;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #45a049;
         }
         button:disabled {
-            background-color: #cccccc;
+            background-color: #2d2d2d;
             cursor: not-allowed;
+            border: 1px solid #444;
         }
         #feedback {
             margin-top: 20px;
@@ -61,20 +72,21 @@
             border-radius: 4px;
         }
         .success {
-            background-color: #dff0d8;
-            color: #3c763d;
+            background-color: #1b5e20;
+            color: #ffffff;
         }
         .error {
-            background-color: #f2dede;
-            color: #a94442;
+            background-color: #b71c1c;
+            color: #ffffff;
         }
         .hash {
             font-family: monospace;
             word-break: break-all;
             margin-top: 10px;
             padding: 10px;
-            background-color: #f8f9fa;
+            background-color: #3d3d3d;
             border-radius: 4px;
+            color: #4CAF50;
         }
         .spinner {
             width: 20px;
@@ -101,7 +113,7 @@
 </head>
 <body>
     <div class="container">
-        <img src="https://hathor.network/assets/img/logo.svg" alt="Hathor Network Logo" class="logo">
+        <img src="https://hathor.network/wp-content/uploads/2023/04/Vector-24.svg" alt="Hathor Network Logo" class="logo">
         <h1>Hathor Hackathon Blueprint Submitter</h1>
         <form id="blueprintForm">
             <textarea id="blueprintCode" placeholder="Enter your blueprint code here..." required></textarea>
@@ -125,11 +137,6 @@
             submitButton.classList.add('loading');
             
             try {
-                console.log('---', code.replace(/(?:\r\n|\r|\n)/g, '\n'))
-                console.log('***', JSON.stringify({
-                        address: 'WdMs4X39hC6Bgm8QBoB9GtaXFciTFoWwwF',
-                        code: code.replace(/(?:\r\n|\r|\n)/g, '\n')
-                    }))
                 const response = await fetch('/submit-blueprint', {
                     method: 'POST',
                     headers: {
