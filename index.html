@@ -123,6 +123,13 @@
             color: #aaaaaa;
             font-style: italic;
         }
+        .error a {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        .error a:hover {
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -149,6 +156,15 @@
             // Clear previous feedback
             feedback.className = '';
             feedback.innerHTML = '';
+
+            // Validate blueprint pattern
+            if (!code.includes('__blueprint__')) {
+                feedback.className = 'error';
+                feedback.innerHTML = 'The blueprint should have \'__blueprint__ = BlueprintClass\' at the end of the file. ' +
+                    'For example, the SwapDemo blueprint has \'__blueprint__ = SwapDemo\' at the end ' +
+                    '<a href="https://explorer.hackaton.hathor.network/blueprint/detail/000001624120d1a0271d823d8f05117f85edb24715259cad32837e34f5db7e7a" target="_blank">(code)</a>';
+                return;
+            }
             
             // Disable button and show loading state
             submitButton.disabled = true;
@@ -176,7 +192,7 @@
                         '<a href="https://explorer.hackaton.hathor.network/blueprint/detail/' + data.hash + '" target="_blank">' +
                         data.hash + '</a></div>' +
                         '<div class="note">Note: the blueprint might not be visible on the explorer yet. ' +
-                        'A new block needs to be mined for this to happen. Refresh the page after a few seconds if your blueprint is not found.</div>';
+                        'A new block needs to be mined for this to happen. Refresh the explorer page after a few seconds if your blueprint is not found.</div>';
                 } else {
                     feedback.className = 'error';
                     feedback.textContent = 'Error: ' + data.error;
