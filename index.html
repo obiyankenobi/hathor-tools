@@ -138,12 +138,48 @@
             border-radius: 3px;
             font-size: 14px;
         }
+        .intro-text {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .intro-text p {
+            margin-bottom: 15px;
+        }
+        .intro-text ul {
+            list-style-type: decimal;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        .intro-text li {
+            margin-bottom: 8px;
+        }
+        .intro-text a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .intro-text a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <img src="https://hathor.network/wp-content/uploads/2023/04/Vector-24.svg" alt="Hathor Network Logo" class="logo">
         <h1>Hathor Hackathon Blueprint Submitter</h1>
+        
+        <div class="intro-text">
+            <p>Use this website to submit blueprints to the Hathor Network Hackathon testnet.</p>
+            
+            <p>If you want to learn more about developing on Hathor Network:</p>
+            <ul>
+                <li>Check out our <a href="https://docs.hathor.network/" target="_blank">documentation website</a>.</li>
+                <li>Read the Hackathon <a href="https://docs.google.com/document/d/16pjbV1Hzyeccy5htDt_XocI5o4OmF8nPnry4kogy0tY/" target="_blank">developer info</a>.</li>
+                <li>Check the Nano Contracts <a href="https://gist.github.com/obiyankenobi/5022f8725f49537c0dfe3db1d5097080" target="_blank">cheatsheet</a>.</li>
+            </ul>
+            
+            <p>For other technical questions, you can use Hathor's Discord <code>#development</code> channel: <a href="https://discord.gg/3zemf6CM" target="_blank">https://discord.gg/3zemf6CM</a>.</p>
+        </div>
+
         <form id="blueprintForm">
             <textarea id="blueprintCode" placeholder="Enter your blueprint code here..." required></textarea>
             <button type="submit" id="submitButton">
