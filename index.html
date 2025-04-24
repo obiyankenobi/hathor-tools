@@ -79,6 +79,7 @@
         .error {
             background-color: #b71c1c;
             color: #ffffff;
+            line-height: 1.5;
         }
         .hash {
             font-family: monospace;
@@ -130,6 +131,13 @@
         .error a:hover {
             text-decoration: none;
         }
+        code {
+            font-family: monospace;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -160,8 +168,8 @@
             // Validate blueprint pattern
             if (!code.includes('__blueprint__')) {
                 feedback.className = 'error';
-                feedback.innerHTML = 'The blueprint should have \'__blueprint__ = BlueprintClass\' at the end of the file. ' +
-                    'For example, the SwapDemo blueprint has \'__blueprint__ = SwapDemo\' at the end ' +
+                feedback.innerHTML = 'The blueprint should have <code>__blueprint__ = BlueprintClass</code> at the end of the file. ' +
+                    'For example, the SwapDemo blueprint has <code>__blueprint__ = SwapDemo</code> at the end ' +
                     '<a href="https://explorer.hackaton.hathor.network/blueprint/detail/000001624120d1a0271d823d8f05117f85edb24715259cad32837e34f5db7e7a" target="_blank">(code)</a>';
                 return;
             }
