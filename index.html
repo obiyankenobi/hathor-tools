@@ -89,6 +89,13 @@
             border-radius: 4px;
             color: #4CAF50;
         }
+        .hash a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .hash a:hover {
+            text-decoration: underline;
+        }
         .spinner {
             width: 20px;
             height: 20px;
@@ -109,6 +116,12 @@
         }
         .loading .button-text {
             display: none;
+        }
+        .note {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #aaaaaa;
+            font-style: italic;
         }
     </style>
 </head>
@@ -159,7 +172,11 @@
                 if (data.success) {
                     feedback.className = 'success';
                     feedback.innerHTML = 'Blueprint submitted successfully!<br>' +
-                        '<div class="hash">Transaction Hash: ' + data.hash + '</div>';
+                        '<div class="hash">See blueprint on the explorer: ' +
+                        '<a href="https://explorer.hackaton.hathor.network/blueprint/detail/' + data.hash + '" target="_blank">' +
+                        data.hash + '</a></div>' +
+                        '<div class="note">Note: the blueprint might not be visible on the explorer yet. ' +
+                        'A new block needs to be mined for this to happen. Refresh the page after a few seconds if your blueprint is not found.</div>';
                 } else {
                     feedback.className = 'error';
                     feedback.textContent = 'Error: ' + data.error;
