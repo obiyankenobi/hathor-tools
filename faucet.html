@@ -165,7 +165,11 @@
             <input type="text" id="addressInput" placeholder="Enter your testnet wallet address" required>
             <div class="captcha-container">
                 <!-- test 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI, prod 6LdskCcrAAAAAAd3IrBKiHkdLvxrwQl5BSHLIyvn -->
-                <div class="g-recaptcha" data-callback="enableSubmit" data-expired-callback="disableSubmit" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                <div class="g-recaptcha" 
+                    data-callback="enableSubmit" 
+                    data-expired-callback="disableSubmit" 
+                    data-theme="dark"
+                    data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
             </div>
             <button type="submit" id="submitButton" disabled>
                 <div class="spinner"></div>
@@ -204,7 +208,7 @@
                 }
 
                 const balance = (data.available / 100).toFixed(2);
-                document.querySelector('.balance-amount').textContent = balance;
+                document.querySelector('.balance-amount').textContent = Number(balance).toLocaleString('en-US');
             } catch (error) {
                 document.querySelector('.balance-amount').textContent = 'Error loading balance';
                 console.error('Error:', error);
