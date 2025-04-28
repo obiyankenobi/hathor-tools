@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hathor Testnet Faucet</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -80,6 +81,7 @@
             background-color: #2d2d2d;
             cursor: not-allowed;
             border: 1px solid #444;
+            opacity: 0.6;
         }
         #feedback {
             margin-top: 20px;
@@ -139,6 +141,11 @@
             border-radius: 3px;
             font-size: 14px;
         }
+        .captcha-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -147,7 +154,7 @@
         <h1>Hathor Testnet Faucet</h1>
         
         <div class="intro-text">
-            <p>Get test HTR tokens for the Hathor Network testnet. Each request will send you 0.1 HTR.</p>
+            <p>Get test HTR tokens for the Hathor Network testnet. Each request will send you 1000 HTR.</p>
         </div>
 
         <div class="balance">
@@ -156,7 +163,11 @@
 
         <form id="faucetForm">
             <input type="text" id="addressInput" placeholder="Enter your testnet wallet address" required>
-            <button type="submit" id="submitButton">
+            <div class="captcha-container">
+                <!-- test 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI, prod 6LdskCcrAAAAAAd3IrBKiHkdLvxrwQl5BSHLIyvn -->
+                <div class="g-recaptcha" data-callback="enableSubmit" data-expired-callback="disableSubmit" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+            </div>
+            <button type="submit" id="submitButton" disabled>
                 <div class="spinner"></div>
                 <span class="button-text">Request HTR</span>
             </button>
@@ -165,6 +176,16 @@
     </div>
 
     <script>
+        // Enable submit button when captcha is completed
+        function enableSubmit(token) {
+            document.getElementById('submitButton').disabled = false;
+        }
+
+        // Disable submit button when captcha expires
+        function disableSubmit() {
+            document.getElementById('submitButton').disabled = true;
+        }
+
         // Base58 validation function
         function isBase58(str) {
             const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
@@ -191,7 +212,9 @@
         }
 
         // Load initial balance
-        updateBalance();
+        window.onload = function() {
+            updateBalance();
+        };
 
         document.getElementById('faucetForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -202,6 +225,14 @@
             // Clear previous feedback
             feedback.className = '';
             feedback.innerHTML = '';
+
+            // Get captcha token
+            const captchaToken = grecaptcha.getResponse();
+            if (!captchaToken) {
+                feedback.className = 'error';
+                feedback.textContent = 'Please complete the captcha verification';
+                return;
+            }
 
             // Validate address
             if (!address.startsWith('W') && !address.startsWith('w')) {
@@ -216,7 +247,7 @@
                 return;
             }
 
-            if (address.length !== 34) { // 25 bytes in base58 encoding results in 34 characters
+            if (address.length !== 34) {
                 feedback.className = 'error';
                 feedback.textContent = 'Invalid address: incorrect length';
                 return;
@@ -230,7 +261,8 @@
                 const response = await fetch('/wallet/simple-send-tx', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-Captcha-Token': captchaToken
                     },
                     body: JSON.stringify({
                         address: address
@@ -257,9 +289,10 @@
                 feedback.textContent = 'Error sending transaction. Please try again.';
                 console.error('Error:', error);
             } finally {
-                // Re-enable button and remove loading state
-                submitButton.disabled = false;
+                // Reset captcha and keep button disabled
+                grecaptcha.reset();
                 submitButton.classList.remove('loading');
+                // Button remains disabled until new captcha is completed
             }
         });
     </script>
