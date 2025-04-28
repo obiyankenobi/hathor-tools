@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hathor Testnet Faucet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 912px;
+            margin: 0 auto;
+            padding: 20px 40px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+            filter: brightness(0) invert(1);
+        }
+        h1 {
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        .intro-text {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .balance {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            text-align: center;
+        }
+        .balance-amount {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #3d3d3d;
+            color: #ffffff;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #2d2d2d;
+            cursor: not-allowed;
+            border: 1px solid #444;
+        }
+        #feedback {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #1b5e20;
+            color: #ffffff;
+        }
+        .error {
+            background-color: #b71c1c;
+            color: #ffffff;
+            line-height: 1.5;
+        }
+        .hash {
+            font-family: monospace;
+            word-break: break-all;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #3d3d3d;
+            border-radius: 4px;
+            color: #4CAF50;
+        }
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+            display: none;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loading .spinner {
+            display: inline-block;
+        }
+        .loading .button-text {
+            display: none;
+        }
+        code {
+            font-family: monospace;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://hathor.network/wp-content/uploads/2023/04/Vector-24.svg" alt="Hathor Network Logo" class="logo">
+        <h1>Hathor Testnet Faucet</h1>
+        
+        <div class="intro-text">
+            <p>Get test HTR tokens for the Hathor Network testnet. Each request will send you 0.1 HTR.</p>
+        </div>
+
+        <div class="balance">
+            Faucet Balance: <span class="balance-amount">Loading...</span> HTR
+        </div>
+
+        <form id="faucetForm">
+            <input type="text" id="addressInput" placeholder="Enter your testnet wallet address" required>
+            <button type="submit" id="submitButton">
+                <div class="spinner"></div>
+                <span class="button-text">Request HTR</span>
+            </button>
+        </form>
+        <div id="feedback"></div>
+    </div>
+
+    <script>
+        // Base58 validation function
+        function isBase58(str) {
+            const base58Chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+            return str.split('').every(char => base58Chars.includes(char));
+        }
+
+        // Function to update balance
+        async function updateBalance() {
+            try {
+                const response = await fetch('/wallet/balance');
+                const data = await response.json();
+                
+                if (data.success === false) {
+                    document.querySelector('.balance-amount').textContent = 'Error loading balance';
+                    return;
+                }
+
+                const balance = (data.available / 100).toFixed(2);
+                document.querySelector('.balance-amount').textContent = balance;
+            } catch (error) {
+                document.querySelector('.balance-amount').textContent = 'Error loading balance';
+                console.error('Error:', error);
+            }
+        }
+
+        // Load initial balance
+        updateBalance();
+
+        document.getElementById('faucetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const feedback = document.getElementById('feedback');
+            const submitButton = document.getElementById('submitButton');
+            const address = document.getElementById('addressInput').value.trim();
+            
+            // Clear previous feedback
+            feedback.className = '';
+            feedback.innerHTML = '';
+
+            // Validate address
+            if (!address.startsWith('W') && !address.startsWith('w')) {
+                feedback.className = 'error';
+                feedback.textContent = 'Invalid address: testnet addresses must start with W or w';
+                return;
+            }
+
+            if (!isBase58(address)) {
+                feedback.className = 'error';
+                feedback.textContent = 'Invalid address: must be in base58 format';
+                return;
+            }
+
+            if (address.length !== 34) { // 25 bytes in base58 encoding results in 34 characters
+                feedback.className = 'error';
+                feedback.textContent = 'Invalid address: incorrect length';
+                return;
+            }
+            
+            // Disable button and show loading state
+            submitButton.disabled = true;
+            submitButton.classList.add('loading');
+            
+            try {
+                const response = await fetch('/wallet/simple-send-tx', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        address: address
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    feedback.className = 'success';
+                    feedback.innerHTML = 'Transaction sent successfully!<br>' +
+                        '<div class="hash">Transaction Hash: ' + data.hash + '</div>';
+                    
+                    // Update balance after successful transaction
+                    await updateBalance();
+                } else {
+                    feedback.className = 'error';
+                    feedback.textContent = 'Error: ' + data.message;
+                }
+            } catch (error) {
+                feedback.className = 'error';
+                feedback.textContent = 'Error sending transaction. Please try again.';
+                console.error('Error:', error);
+            } finally {
+                // Re-enable button and remove loading state
+                submitButton.disabled = false;
+                submitButton.classList.remove('loading');
+            }
+        });
+    </script>
+</body>
+</html> 
