@@ -104,6 +104,13 @@
             border-radius: 4px;
             color: #4CAF50;
         }
+        .hash a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        .hash a:hover {
+            text-decoration: underline;
+        }
         .spinner {
             width: 20px;
             height: 20px;
@@ -235,13 +242,15 @@
                 if (data.success) {
                     feedback.className = 'success';
                     feedback.innerHTML = 'Transaction sent successfully!<br>' +
-                        '<div class="hash">Transaction Hash: ' + data.hash + '</div>';
+                        '<div class="hash">See transaction on the explorer: ' +
+                        '<a href="https://explorer.hackaton.hathor.network/transaction/' + data.hash + '" target="_blank">' +
+                        data.hash + '</a></div>';
                     
                     // Update balance after successful transaction
                     await updateBalance();
                 } else {
                     feedback.className = 'error';
-                    feedback.textContent = 'Error: ' + data.message;
+                    feedback.textContent = 'Error: ' + data.error;
                 }
             } catch (error) {
                 feedback.className = 'error';
