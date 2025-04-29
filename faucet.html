@@ -33,6 +33,11 @@
             margin-bottom: 20px;
             line-height: 1.5;
         }
+        .testnet-info {
+            margin-bottom: 20px;
+            line-height: 1.5;
+            color: #ffffff;
+        }
         .balance {
             font-size: 24px;
             margin: 20px 0;
@@ -134,13 +139,6 @@
         .loading .button-text {
             display: none;
         }
-        code {
-            font-family: monospace;
-            background-color: rgba(0, 0, 0, 0.2);
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 14px;
-        }
         .captcha-container {
             margin-bottom: 20px;
             display: flex;
@@ -151,10 +149,18 @@
 <body>
     <div class="container">
         <img src="https://hathor.network/wp-content/uploads/2023/04/Vector-24.svg" alt="Hathor Network Logo" class="logo">
-        <h1>Hathor Testnet Faucet</h1>
+        <h1>Hathor HackathonTestnet Faucet</h1>
         
         <div class="intro-text">
-            <p>Get test HTR tokens for the Hathor Network testnet. Each request will send you 1000 HTR.</p>
+            <p>Get test HTR tokens for the Hathor Network Hackathon testnet. Each request will send you 1000 HTR.</p>
+        </div>
+
+        <div class="testnet-info">
+            <p>This is the information to connect your wallet to the Hackathon testnet:</p>
+            - Fullnode: https://node1.hackaton.hathor.network/v1a/<br>
+            - Tx Mining Server: https://txmining.hackaton.hathor.network<br>
+            - Explorer: https://explorer.hackaton.hathor.network<br>
+            - Explorer-service: https://explorer-service.hackaton.hathor.network
         </div>
 
         <div class="balance">
@@ -169,7 +175,7 @@
                     data-callback="enableSubmit" 
                     data-expired-callback="disableSubmit" 
                     data-theme="dark"
-                    data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                    data-sitekey="6LdskCcrAAAAAAd3IrBKiHkdLvxrwQl5BSHLIyvn"></div>
             </div>
             <button type="submit" id="submitButton" disabled>
                 <div class="spinner"></div>
