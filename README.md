@@ -1,51 +1,37 @@
-# Hathor Hackathon Blueprint Submitter
+# Hathor Tools
 
-A simple web application for submitting blueprints to the Hathor Network.
+Simples tools to support Hathor development.
+
+Currently, it has information specifically for the Hackathon testnet on the webpages.
 
 ## Prerequisites
 
 - Docker
 - Docker Compose (optional)
+- Wallet headless running on localhost port 8000
 
-## Running the Application
-
-### Using Docker
+## Running in Docker
 
 1. Build the Docker image:
 ```bash
-docker build -t hathor-blueprint-submitter .
+docker build -t hathor-tools .
 ```
 
 2. Run the container:
 ```bash
-docker run -p 80:80 hathor-blueprint-submitter
+docker run -p 8081:8081 -p 8082:8082 -p 8000:8000 hathor-tools
 ```
 
-### Using Docker Compose
+## Tools
 
-1. Create a `docker-compose.yml` file with the following content:
-```yaml
-version: '3'
-services:
-  web:
-    build: .
-    ports:
-      - "80:80"
-```
+### Blueprint submitter
 
-2. Run the application:
-```bash
-docker-compose up
-```
+Simple webpage to submit blueprint. Checks it has the `__blueprint__ = BlueprintName` in the file.
 
-## Accessing the Application
+Runs on port 8081.
 
-Once running, you can access the application at:
-- http://localhost
+### Faucet
 
-## API Endpoint
+Sends 1000 HTR.
 
-The application proxies requests to:
-- http://localhost:8000/wallet/nano-contracts/create-on-chain-blueprint
-
-Make sure the backend service is running on port 8000 before submitting blueprints. 
+Runs on port 8082.

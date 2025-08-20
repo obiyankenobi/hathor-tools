@@ -24,6 +24,8 @@ COPY faucet-nginx.conf /etc/nginx/conf.d/
 # Copy the static files
 COPY blueprint.html /usr/share/nginx/html/
 COPY faucet.html /usr/share/nginx/html/
+COPY nano.html /usr/share/nginx/html/
+COPY nano-nginx.conf /etc/nginx/sites-enabled/
 
 # Expose ports
 EXPOSE 8081 8082 
