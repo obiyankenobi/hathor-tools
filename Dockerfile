@@ -10,7 +10,7 @@ RUN mkdir -p /etc/nginx/conf.d
 # Copy the nginx configurations
 #COPY blueprint-nginx.conf /etc/nginx/sites-enabled/
 #COPY faucet-nginx.conf /etc/nginx/sites-enabled/
-COPY blueprint-nginx.conf /etc/nginx/conf.d/
+#COPY blueprint-nginx.conf /etc/nginx/conf.d/
 COPY faucet-nginx.conf /etc/nginx/conf.d/
 #etc/nginx/conf.d/*.conf;
 
@@ -22,10 +22,11 @@ COPY faucet-nginx.conf /etc/nginx/conf.d/
 #}' > /usr/local/openresty/nginx/conf/nginx.conf
 
 # Copy the static files
-COPY blueprint.html /usr/share/nginx/html/
+#COPY blueprint.html /usr/share/nginx/html/
 COPY faucet.html /usr/share/nginx/html/
 COPY nano.html /usr/share/nginx/html/
-COPY nano-nginx.conf /etc/nginx/sites-enabled/
+#COPY nano-nginx.conf /etc/nginx/sites-enabled/
 
 # Expose ports
-EXPOSE 8081 8082 
+#EXPOSE 8081 8082 
+EXPOSE 8082 

@@ -149,18 +149,18 @@
 <body>
     <div class="container">
         <img src="https://hathor.network/wp-content/uploads/2023/04/Vector-24.svg" alt="Hathor Network Logo" class="logo">
-        <h1>Hathor HackathonTestnet Faucet</h1>
+        <h1>Hathor Testnet Faucet</h1>
         
         <div class="intro-text">
-            <p>Get test HTR tokens for the Hathor Network Hackathon testnet. Each request will send you 1000 HTR.</p>
+            <p>Get test HTR tokens for the Hathor Network testnet. Each request will send you 1000 HTR.</p>
         </div>
 
         <div class="testnet-info">
-            <p>This is the information to connect your wallet to the Hackathon testnet:</p>
-            - Fullnode: https://node1.hackaton.hathor.network/v1a/<br>
-            - Tx Mining Server: https://txmining.hackaton.hathor.network<br>
-            - Explorer: https://explorer.hackaton.hathor.network<br>
-            - Explorer-service: https://explorer-service.hackaton.hathor.network
+            <p>This is the information to connect your wallet to the testnet:</p>
+            - Fullnode: https://node1.testnet.hathor.network/v1a/<br>
+            - Tx Mining Server: https://txmining.testnet.hathor.network<br>
+            - Explorer: https://explorer.testnet.hathor.network<br>
+            - Explorer-service: https://explorer-service.testnet.hathor.network
         </div>
 
         <div class="balance">
@@ -285,7 +285,7 @@
                     feedback.className = 'success';
                     feedback.innerHTML = 'Transaction sent successfully!<br>' +
                         '<div class="hash">See transaction on the explorer: ' +
-                        '<a href="https://explorer.hackaton.hathor.network/transaction/' + data.hash + '" target="_blank">' +
+                        '<a href="https://explorer.testnet.hathor.network/transaction/' + data.hash + '" target="_blank">' +
                         data.hash + '</a></div>';
                     
                     // Update balance after successful transaction
