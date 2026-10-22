@@ -520,6 +520,7 @@
                 name: 'Testnet',
                 apiBase: '',
                 explorer: 'https://explorer.testnet.hathor.network',
+                address: { placeholder: 'W...', prefixes: 'W or w', lengths: { W: 34, w: 34 } },
                 endpoints: [
                     ['Fullnode', 'https://node1.testnet.hathor.network/v1a/'],
                     ['Tx Mining', 'https://txmining.testnet.hathor.network'],
@@ -531,6 +532,9 @@
                 name: 'Shielded Testnet',
                 apiBase: '/shielded',
                 explorer: 'https://explorer.shielded-outputs.testnet.hathor.network',
+                // Shielded K addresses only. The wallet pays their transparent
+                // twin and validates the checksum, so length is left to it.
+                address: { placeholder: 'K...', prefixes: 'K', lengths: { K: null } },
                 endpoints: [
                     ['Fullnode', 'https://node1.shielded-outputs.testnet.hathor.network/v1a/'],
                     ['Tx Mining', 'https://txmining.shielded-outputs.testnet.hathor.network'],
@@ -616,6 +620,7 @@
             network = NETWORKS[key];
             document.querySelector(`input[name="network"][value="${key}"]`).checked = true;
             document.getElementById('addressLabel').textContent = network.name + ' wallet address';
+            document.getElementById('addressInput').placeholder = network.address.placeholder;
             document.getElementById('infoTitle').textContent = 'Connect your wallet to ' + network.name;
             const feedback = document.getElementById('feedback');
             feedback.className = '';
@@ -683,16 +688,11 @@
                 return;
             }
 
-            if (net === NETWORKS.shielded && address.startsWith('K')) {
+            const expectedLength = net.address.lengths[address[0]];
+            if (expectedLength === undefined) {
                 feedback.className = 'error';
-                feedback.textContent =
-                    'The faucet can only send to transparent addresses. Use your wallet\'s W… address.';
-                return;
-            }
-
-            if (!address.startsWith('W') && !address.startsWith('w')) {
-                feedback.className = 'error';
-                feedback.textContent = 'Invalid address: testnet addresses must start with W or w.';
+                feedback.textContent = 'Invalid address: ' + net.name.toLowerCase() +
+                    ' addresses must start with ' + net.address.prefixes + '.';
                 return;
             }
 
@@ -702,7 +702,7 @@
                 return;
             }
 
-            if (address.length !== 34) {
+            if (expectedLength !== null && address.length !== expectedLength) {
                 feedback.className = 'error';
                 feedback.textContent = 'Invalid address: incorrect length.';
                 return;

@@ -43,8 +43,10 @@ shielded testnet. Each network is a separate wallet headless, routed by path
 prefix in `faucet-nginx.conf`. The drip logic (captcha, cooldown, value
 injection) is shared in `faucet.lua`, parameterized by network name.
 
-The shielded testnet faucet sends a regular transparent output, so it only
-accepts `W…` addresses; shielded `K…` addresses are rejected in the UI.
+Address prefixes are enforced per network: `W…` (or `w…` multisig) on
+testnet, shielded `K…` on the shielded testnet. For a `K…` address the
+wallet headless pays its transparent twin, so the drip arrives as regular,
+unshielded HTR.
 
 To add another network: add a `NETWORKS` entry in `faucet.html` and a pair of
 `/<prefix>/wallet/*` locations in `faucet-nginx.conf`.
