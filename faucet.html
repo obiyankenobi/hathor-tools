@@ -118,6 +118,50 @@
                         inset 0 1px 0 rgba(255, 255, 255, 0.04);
         }
 
+        .network-switch {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            padding: 4px;
+            margin-bottom: 16px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+        }
+
+        .network-switch input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .network-switch span {
+            display: block;
+            padding: 9px 12px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: color 0.15s ease, background 0.15s ease,
+                        box-shadow 0.15s ease;
+        }
+
+        .network-switch span:hover { color: var(--text-primary); }
+
+        .network-switch input:checked + span {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 184, 0, 0.35);
+        }
+
+        .network-switch input:focus-visible + span {
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .network-switch input:disabled + span { cursor: not-allowed; }
+
         .balance {
             display: flex;
             align-items: center;
@@ -314,7 +358,10 @@
             color: var(--text-secondary);
         }
 
-        .info li span:first-child { color: var(--text-muted); }
+        .info li span:first-child {
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
 
         .info-value {
             display: inline-flex;
@@ -420,6 +467,11 @@
         </div>
 
         <div class="card">
+            <div class="network-switch" role="radiogroup" aria-label="Network">
+                <label><input type="radio" name="network" value="testnet" checked><span>Testnet</span></label>
+                <label><input type="radio" name="network" value="shielded"><span>Shielded Testnet</span></label>
+            </div>
+
             <div class="balance">
                 <span class="balance-label">Faucet balance</span>
                 <span class="balance-value">
@@ -429,7 +481,7 @@
 
             <form id="faucetForm">
                 <div class="field">
-                    <label for="addressInput">Testnet wallet address</label>
+                    <label for="addressInput" id="addressLabel">Testnet wallet address</label>
                     <input type="text" id="addressInput"
                            placeholder="W..." autocomplete="off" spellcheck="false" required>
                 </div>
@@ -452,44 +504,44 @@
             <div id="feedback"></div>
 
             <div class="info">
-                <p class="info-title">Connect your wallet to testnet</p>
-                <ul>
-                    <li>
-                        <span>Fullnode</span>
-                        <span class="info-value">
-                            <code>https://node1.testnet.hathor.network/v1a/</code>
-                            <button type="button" class="copy-btn" data-copy="https://node1.testnet.hathor.network/v1a/" aria-label="Copy URL"></button>
-                        </span>
-                    </li>
-                    <li>
-                        <span>Tx Mining</span>
-                        <span class="info-value">
-                            <code>https://txmining.testnet.hathor.network</code>
-                            <button type="button" class="copy-btn" data-copy="https://txmining.testnet.hathor.network" aria-label="Copy URL"></button>
-                        </span>
-                    </li>
-                    <li>
-                        <span>Explorer</span>
-                        <span class="info-value">
-                            <code>https://explorer.testnet.hathor.network</code>
-                            <button type="button" class="copy-btn" data-copy="https://explorer.testnet.hathor.network" aria-label="Copy URL"></button>
-                        </span>
-                    </li>
-                    <li>
-                        <span>Explorer Service</span>
-                        <span class="info-value">
-                            <code>https://explorer-service.testnet.hathor.network</code>
-                            <button type="button" class="copy-btn" data-copy="https://explorer-service.testnet.hathor.network" aria-label="Copy URL"></button>
-                        </span>
-                    </li>
-                </ul>
+                <p class="info-title" id="infoTitle">Connect your wallet to testnet</p>
+                <ul id="networkEndpoints"></ul>
             </div>
         </div>
 
-        <div class="footer">One drip per IP every 6 hours. Be kind to the faucet.</div>
+        <div class="footer">One drip per IP per network every 6 hours. Be kind to the faucet.</div>
     </div>
 
     <script>
+        // Each network is served by its own wallet headless; nginx routes
+        // `${apiBase}/wallet/*` to the right one (see faucet-nginx.conf).
+        const NETWORKS = {
+            testnet: {
+                name: 'Testnet',
+                apiBase: '',
+                explorer: 'https://explorer.testnet.hathor.network',
+                endpoints: [
+                    ['Fullnode', 'https://node1.testnet.hathor.network/v1a/'],
+                    ['Tx Mining', 'https://txmining.testnet.hathor.network'],
+                    ['Explorer', 'https://explorer.testnet.hathor.network'],
+                    ['Explorer Service', 'https://explorer-service.testnet.hathor.network'],
+                ],
+            },
+            shielded: {
+                name: 'Shielded Testnet',
+                apiBase: '/shielded',
+                explorer: 'https://explorer.shielded-outputs.testnet.hathor.network',
+                endpoints: [
+                    ['Fullnode', 'https://node1.shielded-outputs.testnet.hathor.network/v1a/'],
+                    ['Tx Mining', 'https://txmining.shielded-outputs.testnet.hathor.network'],
+                    ['Explorer', 'https://explorer.shielded-outputs.testnet.hathor.network'],
+                    ['Explorer Service', 'https://explorer-service.shielded-outputs.testnet.hathor.network'],
+                ],
+            },
+        };
+
+        let network = NETWORKS.testnet;
+
         // Captcha callbacks
         function enableSubmit(token) {
             document.getElementById('submitButton').disabled = false;
@@ -514,52 +566,104 @@
             return `${seconds}s`;
         }
 
+        // Bumped on every call so a slow response for a previously selected
+        // network can't overwrite the current one.
+        let balanceRequest = 0;
+
         async function updateBalance() {
+            const requestId = ++balanceRequest;
+            const amount = document.querySelector('.balance-amount');
+            let text;
             try {
-                const response = await fetch('/wallet/balance');
+                const response = await fetch(network.apiBase + '/wallet/balance');
                 const data = await response.json();
 
                 if (data.success === false) {
-                    document.querySelector('.balance-amount').textContent = 'unavailable';
-                    return;
+                    text = 'unavailable';
+                } else {
+                    const balance = (data.available / 100).toFixed(2);
+                    text = Number(balance).toLocaleString('en-US');
                 }
-
-                const balance = (data.available / 100).toFixed(2);
-                document.querySelector('.balance-amount').textContent =
-                    Number(balance).toLocaleString('en-US');
             } catch (error) {
-                document.querySelector('.balance-amount').textContent = 'unavailable';
+                text = 'unavailable';
                 console.error('Error:', error);
             }
+            if (requestId === balanceRequest) amount.textContent = text;
         }
 
-        window.addEventListener('load', updateBalance);
+        function renderEndpoints() {
+            const list = document.getElementById('networkEndpoints');
+            list.replaceChildren(...network.endpoints.map(([label, url]) => {
+                const li = document.createElement('li');
+                const name = document.createElement('span');
+                name.textContent = label;
+                const value = document.createElement('span');
+                value.className = 'info-value';
+                const code = document.createElement('code');
+                code.textContent = url;
+                const copy = document.createElement('button');
+                copy.type = 'button';
+                copy.className = 'copy-btn';
+                copy.dataset.copy = url;
+                copy.setAttribute('aria-label', 'Copy URL');
+                value.append(code, copy);
+                li.append(name, value);
+                return li;
+            }));
+        }
 
-        // Copy-to-clipboard for the testnet endpoint URLs
-        document.querySelectorAll('.copy-btn').forEach((btn) => {
-            btn.addEventListener('click', async () => {
-                const text = btn.dataset.copy;
-                if (!text) return;
-                try {
-                    if (navigator.clipboard && navigator.clipboard.writeText) {
-                        await navigator.clipboard.writeText(text);
-                    } else {
-                        // Fallback for non-secure contexts
-                        const ta = document.createElement('textarea');
-                        ta.value = text;
-                        ta.style.position = 'fixed';
-                        ta.style.opacity = '0';
-                        document.body.appendChild(ta);
-                        ta.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(ta);
-                    }
-                    btn.classList.add('copied');
-                    setTimeout(() => btn.classList.remove('copied'), 1500);
-                } catch (err) {
-                    console.error('Copy failed:', err);
-                }
+        function setNetwork(key) {
+            network = NETWORKS[key];
+            document.querySelector(`input[name="network"][value="${key}"]`).checked = true;
+            document.getElementById('addressLabel').textContent = network.name + ' wallet address';
+            document.getElementById('infoTitle').textContent = 'Connect your wallet to ' + network.name;
+            const feedback = document.getElementById('feedback');
+            feedback.className = '';
+            feedback.innerHTML = '';
+            document.querySelector('.balance-amount').textContent = 'Loading…';
+            renderEndpoints();
+            updateBalance();
+        }
+
+        document.querySelectorAll('input[name="network"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                setNetwork(radio.value);
+                // Keep the choice in the URL so it can be linked to directly.
+                const url = new URL(window.location.href);
+                if (radio.value === 'testnet') url.searchParams.delete('network');
+                else url.searchParams.set('network', radio.value);
+                history.replaceState(null, '', url);
             });
+        });
+
+        const requested = new URLSearchParams(window.location.search).get('network');
+        setNetwork(Object.hasOwn(NETWORKS, requested) ? requested : 'testnet');
+
+        // Copy-to-clipboard for the endpoint URLs (rendered per network)
+        document.getElementById('networkEndpoints').addEventListener('click', async (e) => {
+            const btn = e.target.closest('.copy-btn');
+            if (!btn) return;
+            const text = btn.dataset.copy;
+            if (!text) return;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    // Fallback for non-secure contexts
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                btn.classList.add('copied');
+                setTimeout(() => btn.classList.remove('copied'), 1500);
+            } catch (err) {
+                console.error('Copy failed:', err);
+            }
         });
 
         document.getElementById('faucetForm').addEventListener('submit', async (e) => {
@@ -567,6 +671,7 @@
             const feedback = document.getElementById('feedback');
             const submitButton = document.getElementById('submitButton');
             const address = document.getElementById('addressInput').value.trim();
+            const net = network;
 
             feedback.className = '';
             feedback.innerHTML = '';
@@ -575,6 +680,13 @@
             if (!captchaToken) {
                 feedback.className = 'error';
                 feedback.textContent = 'Please complete the captcha verification.';
+                return;
+            }
+
+            if (net === NETWORKS.shielded && address.startsWith('K')) {
+                feedback.className = 'error';
+                feedback.textContent =
+                    'The faucet can only send to transparent addresses. Use your wallet\'s W… address.';
                 return;
             }
 
@@ -598,9 +710,11 @@
 
             submitButton.disabled = true;
             submitButton.classList.add('loading');
+            const radios = document.querySelectorAll('input[name="network"]');
+            radios.forEach((radio) => { radio.disabled = true; });
 
             try {
-                const response = await fetch('/wallet/simple-send-tx', {
+                const response = await fetch(net.apiBase + '/wallet/simple-send-tx', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -616,7 +730,7 @@
                     feedback.className = 'success';
                     feedback.innerHTML =
                         'Transaction sent. 1,000 HTR is on its way.' +
-                        '<div class="hash"><a href="https://explorer.testnet.hathor.network/transaction/' +
+                        '<div class="hash"><a href="' + net.explorer + '/transaction/' +
                         data.hash + '" target="_blank">' + data.hash + '</a></div>';
                     await updateBalance();
                 } else if (response.status === 429) {
@@ -640,6 +754,7 @@
             } finally {
                 grecaptcha.reset();
                 submitButton.classList.remove('loading');
+                radios.forEach((radio) => { radio.disabled = false; });
                 // Button stays disabled until a new captcha is solved
             }
         });

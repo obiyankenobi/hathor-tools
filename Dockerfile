@@ -5,6 +5,7 @@ RUN apk add --no-cache perl curl \
     && opm get ledgetech/lua-resty-http
 
 COPY faucet-nginx.conf /etc/nginx/conf.d/
+COPY faucet.lua        /usr/local/openresty/site/lualib/
 COPY faucet.html       /usr/share/nginx/html/
 
 EXPOSE 8082

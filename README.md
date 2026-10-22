@@ -7,8 +7,15 @@ protection, and proxies validated drips to a wallet headless service.
 ## Prerequisites
 
 - Docker
-- Hathor wallet headless reachable from the container at `172.17.0.1:8000`
-  (the default Docker bridge gateway)
+- One Hathor wallet headless per network, reachable from the container on
+  the default Docker bridge gateway (`172.17.0.1`):
+
+  | Network | UI selector | API path | Wallet headless |
+  |---|---|---|---|
+  | Testnet | Testnet | `/wallet/*` | `172.17.0.1:8000` |
+  | Shielded testnet (`shielded-outputs`) | Shielded Testnet | `/shielded/wallet/*` | `172.17.0.1:8001` |
+
+  Both wallets must be started with wallet id `id` (sent as `x-wallet-id`).
 
 ## Configuration
 
@@ -29,6 +36,19 @@ In production, an outer nginx (see `main-nginx.conf`) terminates the
 `faucet.testnet.hathor.network` vhost on :80 and reverse-proxies to the
 container on :8082.
 
+## Networks
+
+The UI has a network selector; `?network=shielded` links straight to the
+shielded testnet. Each network is a separate wallet headless, routed by path
+prefix in `faucet-nginx.conf`. The drip logic (captcha, cooldown, value
+injection) is shared in `faucet.lua`, parameterized by network name.
+
+The shielded testnet faucet sends a regular transparent output, so it only
+accepts `W…` addresses; shielded `K…` addresses are rejected in the UI.
+
+To add another network: add a `NETWORKS` entry in `faucet.html` and a pair of
+`/<prefix>/wallet/*` locations in `faucet-nginx.conf`.
+
 ## Anti-abuse layers
 
 The faucet stacks three independent protections:
@@ -39,9 +59,10 @@ The faucet stacks three independent protections:
    a burst of 1, returning HTTP 429.
 3. **Per-IP cooldown** — a `lua_shared_dict` records the timestamp of every
    successful drip and rejects further requests from the same IP for 6
-   hours. The cooldown is set in `header_filter_by_lua_block` only when
-   the wallet returns 200, so transient wallet errors don't lock users
-   out. Cleared on container restart (acceptable for a testnet faucet).
+   hours, tracked separately per network. The cooldown is set in the body
+   filter only when the wallet returns a successful response, so wallet
+   errors don't lock users out. Cleared on container restart (acceptable
+   for a testnet faucet).
 
 ## Real-IP requirement (important)
 
@@ -58,6 +79,7 @@ IP range to `set_real_ip_from`.
 | File | Purpose |
 |---|---|
 | `faucet.html` | Single-page UI |
-| `faucet-nginx.conf` | OpenResty config: rate limit, captcha, cooldown, proxy |
+| `faucet-nginx.conf` | OpenResty config: per-network routes, rate limit, proxy |
+| `faucet.lua` | Shared drip logic: captcha, per-IP cooldown, value injection |
 | `Dockerfile` | OpenResty Alpine image with `lua-resty-http` |
 | `main-nginx.conf` | Outer reverse proxy vhost (production only) |
